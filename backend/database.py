@@ -3,8 +3,8 @@ from mysql.connector import Error
 import os
 from dotenv import load_dotenv
 
-# Load the secrets from the .env file
-load_dotenv()
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 def get_db_connection():
     try:
@@ -21,6 +21,5 @@ def get_db_connection():
         print(f"❌ Error connecting to MySQL: {e}")
         return None
 
-# Test the connection when this file is run
 if __name__ == "__main__":
     get_db_connection()
