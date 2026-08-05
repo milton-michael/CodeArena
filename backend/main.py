@@ -1,13 +1,21 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from backend.database import get_db_connection
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def read_root():
     return {"message": "Welcome to CodeArena Backend API!"}
 
-# NEW ROUTE: Fetch all problems from the database
 @app.get("/problems")
 def get_all_problems():
     conn = get_db_connection()

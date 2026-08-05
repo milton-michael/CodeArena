@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import './App.css'
 
 function App() {
   const [problems, setProblems] = useState([])
@@ -15,24 +16,30 @@ function App() {
   }, [])
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-      <h1>CodeArena Dashboard</h1>
-      <div style={{ marginTop: '20px' }}>
-        {problems.map((problem) => (
-          <div 
-            key={problem.id} 
-            style={{ 
-              border: '1px solid #ccc', 
-              padding: '15px', 
-              marginBottom: '10px', 
-              borderRadius: '8px' 
-            }}
-          >
-            <h2>{problem.title}</h2>
-            <p>{problem.description}</p>
-          </div>
-        ))}
-      </div>
+    <div className="app-container">
+      <header className="navbar">
+        <h1>CodeArena ⚔️</h1>
+        <nav>
+          <button className="nav-btn">Problems</button>
+          <button className="nav-btn login-btn">Sign In</button>
+        </nav>
+      </header>
+
+      <main className="main-content">
+        <h2 className="section-title">Problem Library</h2>
+        <div className="problem-grid">
+          {problems.map((problem) => (
+            <div key={problem.id} className="problem-card">
+              <div className="problem-header">
+                <h3>{problem.id}. {problem.title}</h3>
+                <span className="difficulty easy">Easy</span>
+              </div>
+              <p className="problem-desc">{problem.description}</p>
+              <button className="solve-btn">Solve Challenge</button>
+            </div>
+          ))}
+        </div>
+      </main>
     </div>
   )
 }
