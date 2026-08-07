@@ -5,7 +5,7 @@ import './App.css'
 function App() {
   const [problems, setProblems] = useState([])
   const [activeProblem, setActiveProblem] = useState(null)
-  const [code, setCode] = useState('print("Hello CodeArena!")\n')
+  const [code, setCode] = useState('def two_sum(nums, target):\n    # Write your logic here\n    pass\n')
   const [output, setOutput] = useState('// Output will appear here...')
   const [isRunning, setIsRunning] = useState(false)
 
@@ -96,7 +96,7 @@ function App() {
                   {isRunning ? 'Running...' : 'Run Code'}
                 </button>
               </div>
-              <div className="editor-container" style={{ flex: 1, minHeight: 0 }}>
+              <div className="editor-container" style={{ height: '300px' }}>
                 <Editor
                   height="100%"
                   defaultLanguage="python"

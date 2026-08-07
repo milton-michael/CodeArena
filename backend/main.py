@@ -15,7 +15,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# This model defines the structure of the incoming data
 class CodeRequest(BaseModel):
     code: str
 
@@ -43,18 +42,30 @@ def get_all_problems():
 @app.post("/run")
 def run_code(request: CodeRequest):
     try:
-        # Run the code safely using the exact Python executable running the server
+        # Append automated test assertions to the user's script
+        test_script = request.code + """
+
+# --- AUTOMATED TEST SUITE ---
+try:
+    result = two_sum([2, 7, 11, 15], 9)
+    assert result in ([0, 1], [1, 0], (0, 1), (1, 0)), f"Expected [0, 1], got {result}"
+    print("Test Result: ACCEPTED [PASS]")
+except Exception as e:
+    print(f"Test Result: WRONG ANSWER [FAIL]\\nDetails: {e}")
+"""
+        
         result = subprocess.run(
-            [sys.executable, "-c", request.code],
+            [sys.executable, "-c", test_script],
             capture_output=True,
             text=True,
-            timeout=5 # Kills the code if it takes more than 5 seconds (prevents infinite loops)
+            encoding="utf-8",
+            timeout=5
         )
         
         if result.returncode == 0:
             return {"output": result.stdout}
         else:
-            return {"error": result.stderr}
+            return {"error": result.stderr or result.stdout}
             
     except subprocess.TimeoutExpired:
         return {"error": "Timeout: Your code took too long to execute (Infinite loop?)."}
