@@ -15,8 +15,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Added problem_id so the backend knows which test case to fetch
 class CodeRequest(BaseModel):
     code: str
+    problem_id: int
 
 @app.get("/")
 def read_root():
@@ -30,7 +32,8 @@ def get_all_problems():
     
     try:
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM problems")
+        # We only send the problem details to the frontend, NOT the hidden test cases
+        cursor.execute("SELECT id, title, description, difficulty FROM problems")
         problems_list = cursor.fetchall()
         return {"problems": problems_list}
     except Exception as e:
@@ -41,18 +44,21 @@ def get_all_problems():
 
 @app.post("/run")
 def run_code(request: CodeRequest):
+    conn = get_db_connection()
+    if not conn:
+        return {"error": "Database connection failed"}
+        
     try:
-        # Append automated test assertions to the user's script
-        test_script = request.code + """
+        cursor = conn.cursor(dictionary=True)
+        # Fetch the specific test case for the problem the user is solving
+        cursor.execute("SELECT test_case FROM problems WHERE id = %s", (request.problem_id,))
+        problem = cursor.fetchone()
+        
+        if not problem:
+            return {"error": "Problem not found in database."}
 
-# --- AUTOMATED TEST SUITE ---
-try:
-    result = two_sum([2, 7, 11, 15], 9)
-    assert result in ([0, 1], [1, 0], (0, 1), (1, 0)), f"Expected [0, 1], got {result}"
-    print("Test Result: ACCEPTED [PASS]")
-except Exception as e:
-    print(f"Test Result: WRONG ANSWER [FAIL]\\nDetails: {e}")
-"""
+        # Dynamically attach the database test case to the user's code
+        test_script = request.code + problem['test_case']
         
         result = subprocess.run(
             [sys.executable, "-c", test_script],
@@ -71,3 +77,6 @@ except Exception as e:
         return {"error": "Timeout: Your code took too long to execute (Infinite loop?)."}
     except Exception as e:
         return {"error": str(e)}
+    finally:
+        cursor.close()
+        conn.close()

@@ -5,7 +5,7 @@ import './App.css'
 function App() {
   const [problems, setProblems] = useState([])
   const [activeProblem, setActiveProblem] = useState(null)
-  const [code, setCode] = useState('def two_sum(nums, target):\n    # Write your logic here\n    pass\n')
+  const [code, setCode] = useState('')
   const [output, setOutput] = useState('// Output will appear here...')
   const [isRunning, setIsRunning] = useState(false)
 
@@ -20,6 +20,15 @@ function App() {
       .catch((error) => console.error('Error fetching data:', error))
   }, [])
 
+  // Automatically load the right starter code when a problem is clicked
+  useEffect(() => {
+    if (activeProblem?.id === 1) {
+      setCode('def two_sum(nums, target):\n    # Write your logic here\n    pass\n')
+    } else if (activeProblem?.id === 2) {
+      setCode('def multiply(a, b):\n    # Write your logic here\n    pass\n')
+    }
+  }, [activeProblem])
+
   const handleRunCode = () => {
     setIsRunning(true)
     setOutput('Running code...')
@@ -27,7 +36,8 @@ function App() {
     fetch('http://127.0.0.1:8000/run', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: code })
+      // Send BOTH the code and the ID of the problem being solved
+      body: JSON.stringify({ code: code, problem_id: activeProblem.id })
     })
     .then(res => res.json())
     .then(data => {
